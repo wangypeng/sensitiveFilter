@@ -34,5 +34,4 @@ func main() {
 			}
 		}
 	}
-	fmt.Print(sensitiveWordMap.tree["p"].tree["e"].tree["n"].tree["g"])
 }
