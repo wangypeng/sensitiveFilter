@@ -1,0 +1,154 @@
+package WordFilter
+
+import (
+	"fmt"
+	"bytes"
+	"strings"
+)
+
+type wordtree struct {
+	tree map[string]*wordtree
+	isEnd bool
+}
+
+/*
+*	this is store sensitive words in memory
+* 	private variable 
+*/
+var SensitiveWordMap wordtree
+
+/*
+* 	local sensitive word list to memory
+*	private method
+*/
+func LoadSensitiveWord(set []string) {
+	for _ , value := range set {
+		nowMap := &SensitiveWordMap
+		wordLenth := len(value)
+		for i := 0 ; i < wordLenth ; i ++ {
+			char := string(value[i])
+			wordMap := nowMap.tree[char]
+			if wordMap != nil {  
+				nowMap = wordMap
+			}else{
+				var newtree wordtree
+				if(nowMap.tree == nil){
+					nowMap.tree = make(map[string]*wordtree)
+				}
+				nowMap.tree[char] = &newtree
+				nowMap = &newtree
+			}
+			if(i == wordLenth-1){
+				nowMap.isEnd = true
+			}
+		}
+	}
+	fmt.Println("load sensitive word map end ...")
+}
+/*
+*	delete sensitive word from memory
+*	private method
+*/
+func DelSensitiveWord (delword string){
+	nowMap := &SensitiveWordMap
+	forkNo := 0
+LABEL1:
+	for i := 0 ; i < len(delword) ; i ++ {
+		word := string(delword[i])
+		if(len(nowMap.tree) > 2){
+			forkNo = i;
+		}
+		nowMap = nowMap.tree[word]
+		if nowMap != nil {
+			if nowMap.isEnd && i == len(delword) -1 {
+				nowMap = &SensitiveWordMap
+				for j := 0 ; j < forkNo + 1 ; j ++ {
+					if j != forkNo {
+						nowMap = nowMap.tree[string(delword[j])]
+					}else{
+						delete(nowMap.tree,string(delword[j]))
+					}
+				}
+			}
+		}else{
+			nowMap = &SensitiveWordMap
+			nowMap = nowMap.tree[word]
+			if nowMap == nil {
+				nowMap = &SensitiveWordMap;
+			}
+		}
+		continue LABEL1
+	}
+}
+/*
+*	replace sensitive word from memory
+*	private method
+*/
+func ReplaceSensitiveWord (txt string) string {
+
+	var word string
+	var failWord bytes.Buffer
+	resultText := txt
+
+	nowMap := &SensitiveWordMap
+
+LABEL1:
+	for i := 0 ; i < len(txt) ; i++ {
+		word = string(txt[i])
+		nowMap = nowMap.tree[word]
+		if nowMap != nil {
+			failWord.WriteString(word)
+			if nowMap.isEnd {
+				if len(nowMap.tree) == 1 {
+					resultText = replace(len(failWord.String()),i,resultText)
+
+					nowMap = &SensitiveWordMap
+					failWord.Reset()
+					continue LABEL1
+				} else if len(nowMap.tree) > 1 {
+					if i == (len(txt)-1) {
+						resultText = replace(len(failWord.String()),i,resultText)
+
+						nowMap = &SensitiveWordMap
+						failWord.Reset()
+						continue LABEL1
+					}else{
+						if nowMap.tree[string(txt[i+1])] == nil {
+							resultText = replace(len(failWord.String()),i,resultText)
+
+							nowMap = &SensitiveWordMap
+							failWord.Reset()
+							continue LABEL1
+						}else{
+							continue LABEL1
+						}
+					}
+				}
+			}
+		}else{
+			nowMap = &SensitiveWordMap
+			failWord.Reset()
+			nowMap = nowMap.tree[word]
+			if nowMap == nil {
+				nowMap = &SensitiveWordMap
+				failWord.Reset()
+			}else{
+				failWord.WriteString(word)
+			}
+			continue LABEL1
+		}
+	}
+	return resultText 
+}
+
+func replace (failLength int ,local int ,preWord string) string{
+	var replaceWord bytes.Buffer
+	for j := 0 ; j < failLength ; j++ {
+		replaceWord.WriteString("*")
+	}
+	prefix := string(preWord[0:local-(failLength-1)])
+	suffix := string(preWord[local+1:len(preWord)])
+	return strings.Join([]string{prefix , replaceWord.String() , suffix},"")
+}
+
+
