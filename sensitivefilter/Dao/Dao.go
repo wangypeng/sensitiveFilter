@@ -34,7 +34,7 @@ func (dao *Dao) FindOne (queryWord string) (bool) {
 	err := session.DB("test").C("people").Find(bson.M{"word":queryWord}).One(p)
 
 	if err != nil {
-		fmt.Println("delete word to Db fail")
+		fmt.Println("find word to Db fail")
 	}
 
 	var resultData bool

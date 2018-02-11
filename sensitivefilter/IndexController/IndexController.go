@@ -50,7 +50,6 @@ func (clt *Controller) addSensitive (w http.ResponseWriter, r *http.Request, par
         var wordlist []string
         wordlist = append(wordlist,params.ByName("word"))
         wordFilter.LoadSensitiveWord(wordlist)
-        fmt.Println(wordFilter.SensitiveWordMap)
         if err == nil {
             fmt.Println("add sensitive success")
             result.Code = "200"
@@ -111,7 +110,6 @@ func (clt *Controller) check (w http.ResponseWriter, r *http.Request, ps httprou
 
     resultText := wordFilter.ReplaceSensitiveWord(text)
 
-    fmt.Println("add sensitive success")
     result.Code = "200"
     result.Success = true
     result.Message = "success"

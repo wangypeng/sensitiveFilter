@@ -32,7 +32,6 @@ func init (){
     if err != nil {
         panic(err)
     }
-    defer session.Close()
 
     // Optional. Switch the session to a monotonic behavior.
     session.SetMode(mgo.Monotonic, true)
@@ -62,4 +61,10 @@ func main() {
 
     log.Print("http server start success !!!")
 
+    defer destory()
+
+}
+
+func destory (){
+    session.Close()
 }
