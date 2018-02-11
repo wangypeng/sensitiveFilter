@@ -1,4 +1,4 @@
-package Dao
+package dao
 
 import (
 	"fmt"
@@ -24,6 +24,28 @@ func (dao *Dao) Query (limit int , skip int) []model.WordStruct{
 	return p
 }
 
+func (dao *Dao) FindOne (queryWord string) (bool) {
+
+	session := dao.S.Copy()
+	defer session.Close()
+
+	var p *model.WordStruct
+
+	err := session.DB("test").C("people").Find(bson.M{"word":queryWord}).One(p)
+
+	if err != nil {
+		fmt.Println("delete word to Db fail")
+	}
+
+	var resultData bool
+	if p != nil || err != nil{ 
+		resultData = false
+	} else {
+		resultData = true
+	}
+	return resultData;
+}
+
 func (dao *Dao) Insert (data *model.WordStruct) error{
 
 	session := dao.S.Copy()
@@ -38,12 +60,12 @@ func (dao *Dao) Insert (data *model.WordStruct) error{
 	return err;
 }
 
-func (dao *Dao) Delete (delData *model.WordStruct) error {
+func (dao *Dao) Delete (word string) error {
 
 	session := dao.S.Copy()
 	defer session.Close()
 
-	err := session.DB("test").C("people").Remove(delData)
+	err := session.DB("test").C("people").Remove(bson.M{"word":word})
 
 	if err != nil {
 		fmt.Println("delete word to Db fail")

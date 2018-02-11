@@ -1,4 +1,4 @@
-package IndexController
+package indexController
 
 import (
 	"gopkg.in/mgo.v2"
@@ -15,6 +15,7 @@ func InitRoute(session *mgo.Session) *httprouter.Router {
 	route := httprouter.New()
 	route.PUT("/add/:word", contoller.addSensitive)
 	route.GET("/check/:word", contoller.check)
+	route.DELETE("/del/:word", contoller.delSensitive)
 	return route
 
 }
